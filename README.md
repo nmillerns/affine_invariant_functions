@@ -10,7 +10,7 @@ This repository contains a sandbox of python (and some matlab) scripts and tools
 This includes affine invariant functions were the affine transformation is scale, and/or rotation, and/or translation. 
 Like a log spiral snail shell where *f(e<sup>&theta;</sup>[cos(&theta;) -sin(&theta;); sin(&theta;) cos(&theta;)]x + [0; 0]) = f(x)*
 
-![SnailShell](figs/snailshell.png | width=200)
+![SnailShell](figs/snailshell.png){:width="400px"}
 
 ![RotationTranslation](figs/tran_rot.gif | width=200)
 
