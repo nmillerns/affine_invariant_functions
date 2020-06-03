@@ -1,5 +1,5 @@
 # Affine Invariant Function Sandbox
-A function *f* on a set *S* is said to be invariant under a transformation *T* of *S* into iteself if *f(T(x)) = f(x)* for all *x* in *S*. [[1]]
+"A function *f* on a set *S* is said to be invariant under a transformation *T* of *S* into iteself if *f(T(x)) = f(x)* for all *x* in *S*". [[1]]
 
 I define an affine invariant function to be a function where there exists an affine transformation *Ax + b* where *A &ne; **0*** invertible, *b &ne; **0*** such that
 *f(Ax + b) = f(x)* for all *x* in the domain of the function with *Ax + b* also in the domain of the function.
