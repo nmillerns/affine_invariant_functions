@@ -8,7 +8,7 @@ This is like an extension of periodic functions *f(x + P) = f(x)* [[2]], which i
 
 This repository contains a sandbox of python (and some matlab) scripts and tools I have used to explore and generate images and animations of affine invariant 2d surface functions. That is functions *f: **R***x***R** &rarr; **R***.
 This includes affine invariant functions were the affine transformation is scale, and/or rotation, and/or translation. 
-Like a log spiral snail shell where *f(e<sup>&theta;</sup>[cos(&theta;) -sin(&theta;); sin(&theta;) cos(&theta;)]x + [0; 0]) = f(x)*
+Like a log spiral snail shell where *f(e<sup>&theta;</sup>[cos(&theta;) -sin(&theta;); sin(&theta;) cos(&theta;)]**x** + [0; 0]) = f(**x**)*
 
 ## Gallery
 <img src="https://raw.githubusercontent.com/nmillerns/affine_invariant_functions/master/figs/tran_rot.gif" height=300> <img src="https://raw.githubusercontent.com/nmillerns/affine_invariant_functions/master/figs/snailshell.png" height=300>
