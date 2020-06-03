@@ -10,13 +10,13 @@ This repository contains a sandbox of python (and some matlab) scripts and tools
 This includes affine invariant functions were the affine transformation is scale, and/or rotation, and/or translation. 
 Like a log spiral snail shell where *f(e<sup>&theta;</sup>[cos(&theta;) -sin(&theta;); sin(&theta;) cos(&theta;)]x + [0; 0]) = f(x)*
 
-![SnailShell](figs/snailshell.png)
+![SnailShell](figs/snailshell.png | width=200)
 
-![RotationTranslation](figs/tran_rot.gif)
+![RotationTranslation](figs/tran_rot.gif | width=200)
 
-![ScaleTranslation](figs/scaled_tran.gif)
+![ScaleTranslation](figs/scaled_tran.gif | width=200)
 
-![ScaleRotationTranslation](figs/smoothmagic.gif)
+![ScaleRotationTranslation](figs/smooth_magic.gif | width=200)
 
 [1]: https://encyclopedia2.thefreedictionary.com/invariant+function 
 [2]: https://en.wikipedia.org/wiki/Periodic_function
