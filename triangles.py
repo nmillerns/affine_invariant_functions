@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from math import sqrt, log, pi, sin, cos, floor
 
-def populate_canvas(canvas, A, b):
+def plot_image(canvas, A, b):
     B = np.array([[1, cos(pi/3.)], [0, sin(pi/3.)]])
     T = np.linalg.inv(B)
     B1 = B[:,0]
@@ -36,7 +36,7 @@ for i in range(N+1):
     theta = pi / 3 * i / N
     A = np.array([[cos(theta), -sin(theta)], [sin(theta), cos(theta)]])
     b = np.array([[0],[0]])
-    populate_canvas(canvas, A, b)
+    plot_image(canvas, A, b)
     cv2.imwrite(f"tanimation{frame}.png", canvas)
     frame += 1
 
@@ -45,7 +45,7 @@ for i in range(N+1):
     theta = 0
     A = np.array([[cos(theta), -sin(theta)], [sin(theta), cos(theta)]])
     b = np.array([[-cos(pi/3)],[-sin(pi/3)]]) * i/N
-    populate_canvas(canvas, A, b)
+    plot_image(canvas, A, b)
     cv2.imwrite(f"tanimation{frame}.png", canvas)
     frame += 1
 
