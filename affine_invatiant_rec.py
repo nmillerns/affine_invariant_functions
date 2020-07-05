@@ -59,13 +59,13 @@ class AffineInvariantRecUnitSqFunction:
                     self.Dmask[row, col] = 0
                 
 
-def populate_large(large, f, A, b):
+def plot_image(canvas, f, A, b):
     W = f.W
     for row in range(W):
         for col in range(W):
             x = square_img_idx_to_coords(W, (row, col))
             x = np.dot(A, x) + b
-            large[row, col, :] = f(x)
+            canvas[row, col, :] = f(x)
 
 
 def A_b_from_params(angle, scale, b, b_scale):
@@ -74,9 +74,9 @@ def A_b_from_params(angle, scale, b, b_scale):
 
 def main(args):
     ifile = "sisters_squared.png"
-    sq = cv2.imread(ifile)
-    assert sq.shape[0] == sq.shape[1]
-    W,W,n = sq.shape
+    sq_img = cv2.imread(ifile)
+    assert sq_img.shape[0] == sq_img.shape[1]
+    W,W,n = sq_img.shape
     P = square_img_idx_to_coords(W, (875, 2152))
     Q = square_img_idx_to_coords(W, (1416, 3337))
     M = np.array([[-1,-1, 1, 0],
@@ -96,74 +96,34 @@ def main(args):
     print(Theta)
     b_final = np.array([[c],[d]])
     b = b_final
-    f = AffineInvariantRecUnitSqFunction(A, b, sq, 3338)
+    f = AffineInvariantRecUnitSqFunction(A, b, sq_img, 900)
     del b
-    large = np.zeros((f.W,f.W,n), dtype=sq.dtype)
+    canvas = np.zeros((f.W,f.W,n), dtype=sq_img.dtype)
     angle = 0.
     scale = 1.
     b_scale = 0.
     frame = 0
 
     A, b = A_b_from_params(angle, scale, b_final, b_scale)
-    populate_large(large, f, A, b)
-    cv2.imwrite(f"magic.png", large)
-    sys.exit(0)
+    plot_image(canvas, f, A, b)
+    cv2.imwrite(f"magic.png", canvas)
     while frame < 2:
-        cv2.imwrite(f"smooth_affine_rec{frame}.png", large)
+        cv2.imwrite(f"smooth_affine_rec{frame}.png", canvas)
         frame += 1
     u = 0
     while scale > 0.8:
         A, b = A_b_from_params(0, scale, b_final, 0)
-        populate_large(large, f, A, b)
-        cv2.imwrite(f"smooth_affine_rec{frame}.png", large)
+        plot_image(canvas, f, A, b)
+        cv2.imwrite(f"smooth_affine_rec{frame}.png", canvas)
         scale -= (1-0.8)/5.
         frame += 1
         
     while u <= 1.:
         A, b = A_b_from_params(u * Theta, 0.8 * (1. - u) + s * u, b_final, u)
-        populate_large(large, f, A, b)
-        cv2.imwrite(f"smooth_affine_rec{frame}.png", large)
+        plot_image(canvas, f, A, b)
+        cv2.imwrite(f"smooth_affine_rec{frame}.png", canvas)
         u += .05
         frame += 1
-    sys.exit(0)
-
-
-    while scale > s:
-        A, b = A_b_from_params(angle, scale, b_final, b_scale)
-        populate_large(large, f, A, b)
-        cv2.imwrite(f"affine_rec{frame}.png", large)
-        scale -= (1. - s)/10.
-        frame += 1
-
-    sys.exit(0)
-    while scale > s:
-        A, b = A_b_from_params(angle, scale, b_final, b_scale)
-        populate_large(large, f, A, b)
-        cv2.imwrite(f"affine_rec{frame}.png", large)
-        scale -= (1. - s)/10.
-        frame += 1
-    scale = s
-    A, b = A_b_from_params(angle, scale, b_final, b_scale)
-    populate_large(large, f, A, b)
-    cv2.imwrite(f"affine_rec{frame}.png", large)
-    while abs(angle) < abs(Theta):
-        A, b = A_b_from_params(angle, scale, b_final, b_scale)
-        populate_large(large, f, A, b)
-        cv2.imwrite(f"affine_rec{frame}.png", large)
-        angle += Theta / 8.
-        frame += 1
-    while b_scale < 1.:
-        A, b = A_b_from_params(angle, scale, b_final, b_scale)
-        populate_large(large, f, A, b)
-        cv2.imwrite(f"affine_rec{frame}.png", large)
-        b_scale += .1
-        frame += 1
-    b_scale = 1.
-    A, b = A_b_from_params(angle, scale, b_final, b_scale)
-    populate_large(large, f, A, b)
-    cv2.imwrite(f"affine_rec{frame}.png", large)
-
-
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv[1:]))    

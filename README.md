@@ -2,7 +2,7 @@
 "A function *f* on a set *S* is said to be invariant under a transformation *T* of *S* into iteself if *f(T(x)) = f(x)* for all *x* in *S*". [[1]]
 
 I define an affine invariant function to be a function where there exists an affine transformation *Ax + b* where *A &ne; **0*** invertible, *b &ne; **0*** such that
-*f(Ax + b) = f(x)* for all *x* in the domain of the function with *Ax + b* also in the domain of the function.
+*f(Ax + b) = f(x)* for all *x* in the domain of the function when *Ax + b* is also in the domain of the function.
 
 This is like an extension of periodic functions *f(x + P) = f(x)* [[2]], which is the special 1d case with *A = 1*, *b = P*.
 
@@ -14,6 +14,10 @@ Like a log spiral snail shell where *f(e<sup>&theta;</sup>[cos(&theta;) -sin(&th
 <img src="https://raw.githubusercontent.com/nmillerns/affine_invariant_functions/master/figs/tran_rot.gif" height=300> <img src="https://raw.githubusercontent.com/nmillerns/affine_invariant_functions/master/figs/snailshell.png" height=300>
 
 <img src="https://raw.githubusercontent.com/nmillerns/affine_invariant_functions/master/figs/scaled_tran.gif" height=400> <img src="https://raw.githubusercontent.com/nmillerns/affine_invariant_functions/master/figs/smooth_magic.gif" height=400>
+
+## Dependencies
+
+To run this code you will require python3, opencv-python, and numpy. Matlab or Octave can be used for the .m scripts.
 
 [1]: https://encyclopedia2.thefreedictionary.com/invariant+function 
 [2]: https://en.wikipedia.org/wiki/Periodic_function
