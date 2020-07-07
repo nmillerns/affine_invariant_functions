@@ -89,7 +89,7 @@ def main(args):
     print(Theta)
     b_final = np.array([[c],[d]])
     b = b_final
-    f = AffineInvariantRecUnitSqFunction(A, b, sq_img, 200)
+    f = AffineInvariantRecUnitSqFunction(A, b, sq_img, 900)
     del b
     plotter = ColorSurfacePlotter(f.W, f.W)
     angle = 0.
