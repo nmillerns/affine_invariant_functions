@@ -9,7 +9,7 @@ class TrianglePattern(ColorSurfaceFunctionBase):
         self.basis = np.array([[1, cos(pi/3.)], [0, sin(pi/3.)]])
         self.T = np.linalg.inv(self.basis)
 
-    def __call__(self, X):
+    def __call__(self, X: np.array):
         U = np.dot(self.T, X)
         u, v = self.toCoords(U)
         r = u - floor(u)
@@ -22,13 +22,11 @@ class TrianglePattern(ColorSurfaceFunctionBase):
         C = (P + Q + R)/3
         rxy = B1 * r + B2 * s
         d = sqrt(np.dot(rxy - C, rxy - C))
-        intensity = 255 * (2 - d)
+        intensity = int(255 * (2 - d))
         return (intensity,intensity,intensity)
 
 frame = 0
 N = 9
-
-canvas = np.zeros((400, 400, 3), dtype=np.uint8)
 plotter = ColorSurfacePlotter(400, 400)
 triangles = TrianglePattern()
 for i in range(N+1):
