@@ -2,11 +2,7 @@ import cv2
 import numpy as np
 import sys
 
-def crop_max_square_from_img(image):
-    rows,cols,n = image.shape
-    d = min(rows, cols)
-    return image[int((rows-d)/2):int((rows+d)/2),int((cols-d)/2):int((cols+d)/2)]
-
+from utils import *
 
 def kernel_read(x, y, k):
     rows,cols,n = k.shape
