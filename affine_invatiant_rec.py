@@ -2,6 +2,7 @@ from math import sqrt, atan2, cos, sin
 import cv2
 import numpy as np
 import sys
+from utils import *
 
 def square_img_idx_to_coords(W, rowcol):
     row, col = rowcol
@@ -24,8 +25,9 @@ def kernel_read(k, x):
     row, col = coords_to_square_img_idx(W, x)
     return k[row,col,:]
 
-class AffineInvariantRecUnitSqFunction:
+class AffineInvariantRecUnitSqFunction(ImageSurface):
     def __init__(self, A, b, k, W):
+        super().__init__(k)
         self.A = A
         self.Ainv = np.linalg.inv(A)
         self.b = b
@@ -59,15 +61,6 @@ class AffineInvariantRecUnitSqFunction:
                     self.Dmask[row, col] = 0
                 
 
-def plot_image(canvas, f, A, b):
-    W = f.W
-    for row in range(W):
-        for col in range(W):
-            x = square_img_idx_to_coords(W, (row, col))
-            x = np.dot(A, x) + b
-            canvas[row, col, :] = f(x)
-
-
 def A_b_from_params(angle, scale, b, b_scale):
         A = np.array([[cos(angle), -sin(angle)], [sin(angle), cos(angle)]])*scale
         return A, b * b_scale
@@ -96,32 +89,31 @@ def main(args):
     print(Theta)
     b_final = np.array([[c],[d]])
     b = b_final
-    f = AffineInvariantRecUnitSqFunction(A, b, sq_img, 900)
+    f = AffineInvariantRecUnitSqFunction(A, b, sq_img, 200)
     del b
-    canvas = np.zeros((f.W,f.W,n), dtype=sq_img.dtype)
+    plotter = ColorSurfacePlotter(f.W, f.W)
     angle = 0.
     scale = 1.
     b_scale = 0.
     frame = 0
 
-    A, b = A_b_from_params(angle, scale, b_final, b_scale)
-    plot_image(canvas, f, A, b)
-    cv2.imwrite(f"magic.png", canvas)
+    plotter.plot_affine(f)
+    plotter.save(f"magic.png")
     while frame < 2:
-        cv2.imwrite(f"smooth_affine_rec{frame}.png", canvas)
+        plotter.save(f"smooth_affine_rec{frame}.png")
         frame += 1
     u = 0
     while scale > 0.8:
         A, b = A_b_from_params(0, scale, b_final, 0)
-        plot_image(canvas, f, A, b)
-        cv2.imwrite(f"smooth_affine_rec{frame}.png", canvas)
+        plotter.plot_affine(f, A=A, b=b)
+        plotter.save(f"smooth_affine_rec{frame}.png")
         scale -= (1-0.8)/5.
         frame += 1
         
     while u <= 1.:
         A, b = A_b_from_params(u * Theta, 0.8 * (1. - u) + s * u, b_final, u)
-        plot_image(canvas, f, A, b)
-        cv2.imwrite(f"smooth_affine_rec{frame}.png", canvas)
+        plotter.plot_affine(f, A=A, b=b)
+        plotter.save(f"smooth_affine_rec{frame}.png")
         u += .05
         frame += 1
 

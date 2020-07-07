@@ -1,43 +1,42 @@
 import cv2
 import numpy as np
+from utils import *
 from math import sqrt, log, pi, sin, cos, floor
 
-def plot_image(canvas, A, b):
-    B = np.array([[1, cos(pi/3.)], [0, sin(pi/3.)]])
-    T = np.linalg.inv(B)
-    B1 = B[:,0]
-    B2 = B[:,1]
-    for i in range(canvas.shape[0]):
-        y = (i*1./canvas.shape[0] - 0.5) * -H
-        for j in range(canvas.shape[1]):
-            x = (j*1./canvas.shape[1] - .5) * W
-            xy = np.array([[x],[y]])
-            xy = np.dot(A, xy) + b
-            uv = np.dot(T, xy)
-            u = uv[0,0]
-            v = uv[1,0]
-            r = u - floor(u)
-            s = v - floor(v)
-            P = np.array([0, 0]) if r < 1 - s else B1 + B2
-            Q = B1
-            R = B2
-            C = (P + Q + R)/3
-            rxy = B1 * r + B2 * s
-            d = sqrt(np.dot(rxy - C, rxy - C))
-            canvas[i,j,:] = 255 * (2 - d)
+class TrianglePattern(ColorSurfaceFunctionBase):
+    def __init__(self):
+        super().__init__(SurfaceDomain(-2.5, -2.5, 2.5, 2.5))
+        self.basis = np.array([[1, cos(pi/3.)], [0, sin(pi/3.)]])
+        self.T = np.linalg.inv(self.basis)
 
-W = 5.
-H = 5.
+    def __call__(self, X):
+        U = np.dot(self.T, X)
+        u, v = self.toCoords(U)
+        r = u - floor(u)
+        s = v - floor(v)
+        B1 = self.basis[:,0]
+        B2 = self.basis[:,1]
+        P = np.array([0, 0]) if r < 1 - s else B1 + B2
+        Q = B1
+        R = B2
+        C = (P + Q + R)/3
+        rxy = B1 * r + B2 * s
+        d = sqrt(np.dot(rxy - C, rxy - C))
+        intensity = 255 * (2 - d)
+        return (intensity,intensity,intensity)
+
 frame = 0
 N = 9
 
 canvas = np.zeros((400, 400, 3), dtype=np.uint8)
+plotter = ColorSurfacePlotter(400, 400)
+triangles = TrianglePattern()
 for i in range(N+1):
     theta = pi / 3 * i / N
     A = np.array([[cos(theta), -sin(theta)], [sin(theta), cos(theta)]])
     b = np.array([[0],[0]])
-    plot_image(canvas, A, b)
-    cv2.imwrite(f"tanimation{frame}.png", canvas)
+    plotter.plot_affine(triangles, A=A, b=b)
+    plotter.save(f"tanimation{frame}.png")
     frame += 1
 
 N = 6
@@ -45,7 +44,7 @@ for i in range(N+1):
     theta = 0
     A = np.array([[cos(theta), -sin(theta)], [sin(theta), cos(theta)]])
     b = np.array([[-cos(pi/3)],[-sin(pi/3)]]) * i/N
-    plot_image(canvas, A, b)
-    cv2.imwrite(f"tanimation{frame}.png", canvas)
+    plotter.plot_affine(triangles, A=A, b=b)
+    plotter.save(f"tanimation{frame}.png")
     frame += 1
 
