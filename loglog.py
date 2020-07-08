@@ -4,57 +4,46 @@ import sys
 
 from utils import *
 
-def kernel_read(x, y, k):
-    rows,cols,n = k.shape
-    return k[int(y*rows),int(x*rows),:]
+class LogLogImagePattern(ImageSurface):
+    def __init__(self, img: np.array):
+        super().__init__(img)
+        self.domain = SurfaceDomain(-1, -1, 15, 15)
+        
+    def __call__(self, X: np.array) -> typing.Tuple[int, int, int]:
+        x, y = self.toCoords(X)
+        if y > -1 and x > -1:
+            u, v = (x+1)/(2**np.floor(np.log2(x+1))) - 1., 2.- (y+1)/(2**np.floor(np.log2(y+1)))
+            return self.img[int(v*(self.height-1)),int(u*(self.width-1)),:]
+        else:
+            return (0, 0, 0)
 
-def plot_image(canvas, k, A, b):
-    W,W,n = canvas.shape
-    for row in range(W):
-        y = -1.99 + .01*row
-        y = A * y + b
-        for col in range(W):
-            x = -1.99 + .01*col
-            x = A * x + b
-            if y > -1 and x > -1:
-                canvas[row,col,:] = kernel_read((x+1)/(2**np.floor(np.log2(x+1))) - 1., (y+1)/(2**np.floor(np.log2(y+1))) - 1., k)
-            else:
-                canvas[row, col, :] = 0
-
-            if abs(-1.99 + .01*col) <= .02 or abs(-1.99 + .01*row) <= .02:
-                canvas[row, col, :] = 255
-
-
-
-def main(args):
+def main(args: typing.List[str]) -> int:
     if len(args) != 1:
-        print("Usage: loglog (imgfile.png)")
+        print("Usage: loglog.py (imgfile.png)")
         return 1
-    ifile = args[0]
-    sq_img = crop_max_square_from_img(cv2.imread(ifile))
-    cv2.imshow('kernel', sq_img)
-    P,P,n = sq_img.shape
-    W = 900
-    canvas = np.zeros((W,W,n), dtype=sq_img.dtype)
+    plotter = ColorSurfacePlotter(900, 900, show_axis = True, axis_thickness = .02)
+    f = LogLogImagePattern(crop_max_square_from_img(cv2.imread(args[0])))
     scale = 1.
     translation = 0.
     frame = 0
     while scale > 0.5:
-        plot_image(canvas, sq_img, scale, translation)
+        A, b = A_b_from_params(rotation_angle=0, scale=scale, b=np.array([[1],[1]]), b_scale=translation)
+        plotter.plot_affine(f, A=A, b=b, domain=SurfaceDomain(-1.99, -1.99, 7, 7))
         print(frame, scale, translation)
-        cv2.imwrite(f'animation{frame}.png', canvas)
+        plotter.save(f'animation{frame}.png')
         scale -= .031250
         frame += 1
     while translation >= -0.5:
-        plot_image(canvas, sq_img, scale, translation)
+        A, b = A_b_from_params(rotation_angle=0, scale=scale, b=np.array([[1],[1]]), b_scale=translation)
+        plotter.plot_affine(f, A=A, b=b, domain=SurfaceDomain(-1.99, -1.99, 7, 7))
         print(frame, scale, translation)
-        cv2.imwrite(f'animation{frame}.png', canvas)
+        plotter.save(f'animation{frame}.png')
         translation -= 0.0625
         frame += 1
 
-    cv2.imwrite('pattern.png', canvas)
+    print("See results in animation*.png and pattern.png")  
+    plotter.save('pattern.png')
     return 0
-
 
 
 if __name__ == '__main__':

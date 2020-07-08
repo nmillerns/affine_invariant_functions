@@ -26,14 +26,13 @@ def kernel_read(k, x):
     return k[row,col,:]
 
 class AffineInvariantRecUnitSqFunction(ImageSurface):
-    def __init__(self, A, b, k, W):
-        super().__init__(k)
+    def __init__(self, A: np.array, b: np.array, img: np.array, W: int):
+        rows, cols, n = img.shape
+        assert rows == cols
+        super().__init__(img)
         self.A = A
         self.Ainv = np.linalg.inv(A)
         self.b = b
-        self.k = k
-        rows, cols, n = self.k.shape
-        assert rows == cols
         self.W = W
         self.Dmask = np.zeros((self.W, self.W), dtype=np.uint8)
         self._populate_dmask()
@@ -42,7 +41,7 @@ class AffineInvariantRecUnitSqFunction(ImageSurface):
         if x[0,0] < -1 or x[0,0] > 1 or x[1,0] < -1 or x[1,0] > 1:
             return (0,0,0)
         if self.in_D(x):
-            return kernel_read(self.k, x)
+            return kernel_read(self.img, x)
         else:
             f = self
             return f(np.dot(self.Ainv, (x - self.b)))
@@ -60,12 +59,7 @@ class AffineInvariantRecUnitSqFunction(ImageSurface):
                 if -1. <= inv[0,0] <= 1. and -1. <= inv[1,0] <= 1.:
                     self.Dmask[row, col] = 0
                 
-
-def A_b_from_params(angle, scale, b, b_scale):
-        A = np.array([[cos(angle), -sin(angle)], [sin(angle), cos(angle)]])*scale
-        return A, b * b_scale
-
-def main(args):
+def main(args: typing.List[str]) -> int:
     ifile = "sisters_squared.png"
     sq_img = cv2.imread(ifile)
     assert sq_img.shape[0] == sq_img.shape[1]
@@ -104,18 +98,19 @@ def main(args):
         frame += 1
     u = 0
     while scale > 0.8:
-        A, b = A_b_from_params(0, scale, b_final, 0)
+        A, b = A_b_from_params(rotation_angle=0, scale=scale, b=b_final, b_scale=0)
         plotter.plot_affine(f, A=A, b=b)
         plotter.save(f"smooth_affine_rec{frame}.png")
         scale -= (1-0.8)/5.
         frame += 1
         
     while u <= 1.:
-        A, b = A_b_from_params(u * Theta, 0.8 * (1. - u) + s * u, b_final, u)
+        A, b = A_b_from_params(rotation_angle=u*Theta, scale = 0.8 * (1. - u) + s * u, b=b_final, b_scale=u)
         plotter.plot_affine(f, A=A, b=b)
         plotter.save(f"smooth_affine_rec{frame}.png")
         u += .05
         frame += 1
+    print("See results in smooth_affine_rec*.png")
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv[1:]))    

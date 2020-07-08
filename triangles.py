@@ -1,4 +1,5 @@
 import cv2
+import sys
 import numpy as np
 from utils import *
 from math import sqrt, log, pi, sin, cos, floor
@@ -25,24 +26,28 @@ class TrianglePattern(ColorSurfaceFunctionBase):
         intensity = int(255 * (2 - d))
         return (intensity,intensity,intensity)
 
-frame = 0
-N = 9
-plotter = ColorSurfacePlotter(400, 400)
-triangles = TrianglePattern()
-for i in range(N+1):
-    theta = pi / 3 * i / N
-    A = np.array([[cos(theta), -sin(theta)], [sin(theta), cos(theta)]])
-    b = np.array([[0],[0]])
-    plotter.plot_affine(triangles, A=A, b=b)
-    plotter.save(f"tanimation{frame}.png")
-    frame += 1
+def main(args: typing.List[str]) -> int:
+    frame = 0
+    N = 9
+    plotter = ColorSurfacePlotter(400, 400)
+    triangles = TrianglePattern()
+    for i in range(N+1):
+        theta = pi / 3 * i / N
+        A, b = A_b_from_params(rotation_angle=theta, scale=1)
+        plotter.plot_affine(triangles, A=A, b=b)
+        plotter.save(f"tanimation{frame}.png")
+        frame += 1
 
-N = 6
-for i in range(N+1):
-    theta = 0
-    A = np.array([[cos(theta), -sin(theta)], [sin(theta), cos(theta)]])
-    b = np.array([[-cos(pi/3)],[-sin(pi/3)]]) * i/N
-    plotter.plot_affine(triangles, A=A, b=b)
-    plotter.save(f"tanimation{frame}.png")
-    frame += 1
+    N = 6
+    for i in range(N+1):
+        theta = 0
+        A, b = A_b_from_params(rotation_angle=theta, scale=1, b=np.array([[-cos(pi/3)],[-sin(pi/3)]]), b_scale=i/N)
+        plotter.plot_affine(triangles, A=A, b=b)
+        plotter.save(f"tanimation{frame}.png")
+        frame += 1
+    print("See resultsin tanimation*.png")
+    return 0
 
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv[1:]))
