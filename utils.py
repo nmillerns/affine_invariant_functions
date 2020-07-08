@@ -1,11 +1,18 @@
 import cv2 
 import numpy as np
 import typing
+from math import sqrt, atan2, cos, sin
 
 def crop_max_square_from_img(image: np.array) -> np.array:
     rows,cols,n = image.shape
     d = min(rows, cols)
     return image[int((rows-d)/2):int((rows+d)/2),int((cols-d)/2):int((cols+d)/2)]
+
+def A_b_from_params(*, rotation_angle: float, scale: float, 
+                    b: np.array = np.array([[0], [0]]), b_scale: float = 0.) -> typing.Tuple[np.array, np.array]:
+        A = np.array([[cos(rotation_angle), -sin(rotation_angle)], 
+                      [sin(rotation_angle), cos(rotation_angle)]]) * scale
+        return A, b * b_scale
 
 class SurfaceDomain:
     def __init__(self, x_low: float, y_low: float, x_high: float, y_high: float):
@@ -46,10 +53,12 @@ class ImageSurface(ColorSurfaceFunctionBase):
 
 
 class ColorSurfacePlotter:
-    def __init__(self, output_width: int, output_height: int):
+    def __init__(self, output_width: int, output_height: int, *, show_axis: bool = False, axis_thickness: int = 1):
         self.canvas = np.zeros((output_height, output_width,3), dtype=np.uint8)
         self.output_width = output_width
         self.output_height = output_height
+        self.show_axis = show_axis
+        self.axis_thickness = axis_thickness
 
     def plot_affine(self, 
              f: ColorSurfaceFunctionBase, *, 
@@ -63,7 +72,10 @@ class ColorSurfacePlotter:
                 x = domain.x_low + col/(self.output_width - 1) * (domain.x_high - domain.x_low)
                 X = np.array([[x],[y]])
                 AX_b = np.dot(A, X) + b
-                self.canvas[row, col, :] = f(AX_b)
+                if self.show_axis and (abs(x) < self.axis_thickness or abs(y) < self.axis_thickness):
+                    self.canvas[row, col, :] = (255, 255, 255)
+                else:
+                    self.canvas[row, col, :] = f(AX_b)
 
     def save(self, dst_path: str):
         cv2.imwrite(dst_path, self.canvas)
