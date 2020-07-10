@@ -15,22 +15,24 @@ def A_b_from_params(*, rotation_angle: float, scale: float,
         return A, b * b_scale
 
 class SurfaceDomain:
-    def __init__(self, x_low: float, y_low: float, x_high: float, y_high: float):
+    def __init__(self, x_low: float, y_low: float, x_high: float, y_high: float, 
+                 x_low_inclusive: bool=True, x_high_inclusive: bool=True, y_low_inclusive: bool=True, y_high_inclusive: bool=True):
         self.x_low = x_low
         self.x_high = x_high
         self.y_low = y_low
         self.y_high = y_high
+        self.boundary_ops_modifiers = ['=' if inclusive else '' for inclusive in (x_low_inclusive, x_high_inclusive, y_low_inclusive, y_high_inclusive)]
+
+    def __contains__(self, xy: typing.Tuple[float, float]):
+        x, y = xy
+        incl1, incl2, incl3, incl4 = self.boundary_ops_modifiers
+        return eval(f"self.x_low <{incl1} x and x <{incl2} self.x_high and self.y_low <{incl3} y and y <{incl4} self.y_high")
 
 class ColorSurfaceFunctionBase:
     def __init__(self, domain: SurfaceDomain):
         self.domain = domain
 
-    @staticmethod
-    def toCoords(X: np.array) -> typing.Tuple[float, float]:
-        return X[0, 0], X[1, 0]
-
-    def __call__(self, X: np.array) -> typing.Tuple[int, int, int]:
-        x, y = self.toCoords(X)
+    def __call__(self, x: float, y: float) -> typing.Tuple[int, int, int]:
         Fxy = (0, 0, 0)
         return Fxy
 
@@ -64,18 +66,21 @@ class ColorSurfacePlotter:
              f: ColorSurfaceFunctionBase, *, 
              A: np.array = np.array([[1, 0], [0, 1]]),
              b: np.array = np.array([[0], [0]]),
-             domain: typing.Optional[SurfaceDomain] = None):
-        if domain == None: domain = f.domain
+             window: typing.Optional[SurfaceDomain] = None):
+        if window is None: window = f.domain
         for row in range(self.output_height):
-            y = domain.y_high + row/(self.output_height - 1) * (domain.y_low - domain.y_high)
+            y = window.y_high + row/(self.output_height - 1) * (window.y_low - window.y_high)
             for col in range(self.output_width):
-                x = domain.x_low + col/(self.output_width - 1) * (domain.x_high - domain.x_low)
+                x = window.x_low + col/(self.output_width - 1) * (window.x_high - window.x_low)
                 X = np.array([[x],[y]])
-                AX_b = np.dot(A, X) + b
+                AX_b_array = np.dot(A, X) + b
+                AX_b = AX_b_array[0, 0], AX_b_array[1, 0]
                 if self.show_axis and (abs(x) < self.axis_thickness or abs(y) < self.axis_thickness):
                     self.canvas[row, col, :] = (255, 255, 255)
+                elif AX_b in window and AX_b in f.domain:
+                    self.canvas[row, col, :] = f(*AX_b)
                 else:
-                    self.canvas[row, col, :] = f(AX_b)
+                    self.canvas[row, col, :] = (0, 0, 0)
 
     def save(self, dst_path: str):
         cv2.imwrite(dst_path, self.canvas)
