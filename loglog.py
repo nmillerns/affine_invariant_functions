@@ -10,7 +10,7 @@ def logsawtooth(x: float) -> float:
 class LogLogImagePattern(ImageSurface):
     def __init__(self, img: np.array):
         super().__init__(img)
-        self.domain = SurfaceDomain(-1, -1, 7, 7, False, False, False, False)
+        self.domain = SurfaceDomain(-1, -1, 15, 15, False, False, False, False)
         
     def __call__(self, x: float, y: float) -> typing.Tuple[int, int, int]:
         u, v = logsawtooth(x), 1. - logsawtooth(y)
@@ -27,14 +27,14 @@ def main(args: typing.List[str]) -> int:
     frame = 0
     while scale > 0.5:
         A, b = A_b_from_params(rotation_angle=0, scale=scale, b=np.array([[1],[1]]), b_scale=translation)
-        plotter.plot_affine(f, A=A, b=b, window=SurfaceDomain(-1.99, -1.99, 7, 7))
+        plotter.plot_affine(f, A=A, b=b, window=SurfaceDomain(-1.99, -1.99, 7, 7, False, False, False, False))
         print(frame, scale, translation)
         plotter.save(f'animation{frame}.png')
         scale -= .031250
         frame += 1
     while translation >= -0.5:
         A, b = A_b_from_params(rotation_angle=0, scale=scale, b=np.array([[1],[1]]), b_scale=translation)
-        plotter.plot_affine(f, A=A, b=b, window=SurfaceDomain(-1.99, -1.99, 7, 7))
+        plotter.plot_affine(f, A=A, b=b, window=SurfaceDomain(-1.99, -1.99, 7, 7, False, False, False, False))
         print(frame, scale, translation)
         plotter.save(f'animation{frame}.png')
         translation -= 0.0625

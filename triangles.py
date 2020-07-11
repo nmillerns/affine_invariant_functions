@@ -6,13 +6,12 @@ from math import sqrt, log, pi, sin, cos, floor
 
 class TrianglePattern(ColorSurfaceFunctionBase):
     def __init__(self):
-        super().__init__(SurfaceDomain(-2.5, -2.5, 2.5, 2.5))
+        super().__init__(SurfaceDomain(-100, -100, 100, 100))
         self.basis = np.array([[1, cos(pi/3.)], [0, sin(pi/3.)]])
         self.T = np.linalg.inv(self.basis)
 
-    def __call__(self, X: np.array):
-        U = np.dot(self.T, X)
-        u, v = self.toCoords(U)
+    def __call__(self, x: float, y: float):
+        u, v = np.dot(self.T, toVec(x, y))
         r = u - floor(u)
         s = v - floor(v)
         B1 = self.basis[:,0]
@@ -34,7 +33,7 @@ def main(args: typing.List[str]) -> int:
     for i in range(N+1):
         theta = pi / 3 * i / N
         A, b = A_b_from_params(rotation_angle=theta, scale=1)
-        plotter.plot_affine(triangles, A=A, b=b)
+        plotter.plot_affine(triangles, A=A, b=b, window=SurfaceDomain(-2.5, -2.5, 2.5, 2.5))
         plotter.save(f"tanimation{frame}.png")
         frame += 1
 
@@ -42,7 +41,7 @@ def main(args: typing.List[str]) -> int:
     for i in range(N+1):
         theta = 0
         A, b = A_b_from_params(rotation_angle=theta, scale=1, b=np.array([[-cos(pi/3)],[-sin(pi/3)]]), b_scale=i/N)
-        plotter.plot_affine(triangles, A=A, b=b)
+        plotter.plot_affine(triangles, A=A, b=b, window=SurfaceDomain(-2.5, -2.5, 2.5, 2.5))
         plotter.save(f"tanimation{frame}.png")
         frame += 1
     print("See resultsin tanimation*.png")

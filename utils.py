@@ -3,6 +3,12 @@ import numpy as np
 import typing
 from math import sqrt, atan2, cos, sin
 
+def toCoords(X: np.array) -> typing.Tuple[float, float]:
+    return X[0, 0], X[1, 0]
+
+def toVec(x, y) -> np.array:
+    return np.array([[x], [y]])
+
 def crop_max_square_from_img(image: np.array) -> np.array:
     rows,cols,n = image.shape
     d = min(rows, cols)
@@ -21,12 +27,21 @@ class SurfaceDomain:
         self.x_high = x_high
         self.y_low = y_low
         self.y_high = y_high
-        self.boundary_ops_modifiers = ['=' if inclusive else '' for inclusive in (x_low_inclusive, x_high_inclusive, y_low_inclusive, y_high_inclusive)]
+        self.x_low_inclusive = x_low_inclusive
+        self.x_high_inclusive = x_high_inclusive
+        self.y_low_inclusive = y_low_inclusive
+        self.y_high_inclusive = y_high_inclusive
+
+    @staticmethod
+    def out_of_interval(low: float, low_inclusive: bool, val: float, high: float, high_inclusive):
+        below = val <= low if not low_inclusive else val < low
+        above = val >= high if not high_inclusive else val > high
+        return below or above
 
     def __contains__(self, xy: typing.Tuple[float, float]):
         x, y = xy
-        incl1, incl2, incl3, incl4 = self.boundary_ops_modifiers
-        return eval(f"self.x_low <{incl1} x and x <{incl2} self.x_high and self.y_low <{incl3} y and y <{incl4} self.y_high")
+        return not self.out_of_interval(self.x_low, self.x_low_inclusive, x, self.x_high, self.x_high_inclusive)\
+               and not self.out_of_interval(self.y_low, self.y_low_inclusive, y, self.y_high, self.y_high_inclusive)
 
 class ColorSurfaceFunctionBase:
     def __init__(self, domain: SurfaceDomain):
@@ -73,11 +88,10 @@ class ColorSurfacePlotter:
             for col in range(self.output_width):
                 x = window.x_low + col/(self.output_width - 1) * (window.x_high - window.x_low)
                 X = np.array([[x],[y]])
-                AX_b_array = np.dot(A, X) + b
-                AX_b = AX_b_array[0, 0], AX_b_array[1, 0]
+                AX_b = toCoords(np.dot(A, X) + b)
                 if self.show_axis and (abs(x) < self.axis_thickness or abs(y) < self.axis_thickness):
                     self.canvas[row, col, :] = (255, 255, 255)
-                elif AX_b in window and AX_b in f.domain:
+                elif (x, y) in window and AX_b in f.domain:
                     self.canvas[row, col, :] = f(*AX_b)
                 else:
                     self.canvas[row, col, :] = (0, 0, 0)
